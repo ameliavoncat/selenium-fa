@@ -1,6 +1,11 @@
 package com.pack;
 
 import java.lang.Thread;
+import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.ArrayList;
+import java.net.URL;
+
 import org.junit.Assert;
 
 import org.openqa.selenium.WebDriver;
@@ -23,10 +28,11 @@ public class FutureAdvisorAutomation {
 		clickFirstGoogleResult(driver);
 		waitForElementByCss(driver, "nav.primary-nav");
 		assertPageTitle(driver, "Online Financial Advisor & Investing Advice | FutureAdvisor");
+		checkPageForDeadLinks(driver);
 
 		navigateToRetirementPage(driver);
 
-		WebElement pageText = waitForElementByXpath(driver, "//*[contains(.,'create a plan')]");
+		WebElement pageText = waitForElementByXpath(driver, "//*[contains(.,'saving for retirement')]");
 		assertPageTitle(driver, "Retirement Planning | Future Advisor");
 		pageText.sendKeys(Keys.CONTROL, Keys.END);
 		sleep(500);
@@ -86,7 +92,7 @@ public class FutureAdvisorAutomation {
 		firstResult.click();
 	}
 
-	public static void navigateToRetirementPage(WebDriver driver) {
+	private static void navigateToRetirementPage(WebDriver driver) {
 		Actions actions = new Actions(driver);
 		WebElement whatWeDo = driver.findElement(By.cssSelector("nav.primary-nav>ul>li.has-drop:nth-of-type(1)"));
 
@@ -95,10 +101,56 @@ public class FutureAdvisorAutomation {
 		retirementLink.click();
 	}
 
-	public static void sleep(Integer mills) {
-		try{
+	private static void checkPageForDeadLinks(WebDriver driver) {
+		List<WebElement> pageLinks = findAllLinks(driver);
+		System.out.println("Testing " + pageLinks.size() + " links, please wait...");
+		for (WebElement link : pageLinks) {
+			try {
+				String linkResponse = getLinkResponse(new URL(link.getAttribute("href")));
+				if(!linkResponse.equals("OK")) {
+					System.out.println("WARNING: " + link.getAttribute("href") +  " returned status " + linkResponse);
+				}
+			} catch (Exception exception) {
+				System.out.println("Exception occurred:"+exception.getMessage());
+			}
+		}
+	}
+
+	private static List<WebElement> findAllLinks(WebDriver driver) {
+		List<WebElement> pageLinks = new ArrayList<WebElement>();
+
+		pageLinks = driver.findElements(By.tagName("a"));
+		pageLinks.addAll(driver.findElements(By.tagName("img")));
+
+		List<WebElement> filteredList = new ArrayList<WebElement>();
+		for (WebElement element : pageLinks) {
+			if (element.getAttribute("href") != null) {
+				filteredList.add(element);
+			}
+		}
+
+		return filteredList;
+	}
+
+	private static String getLinkResponse(URL url) throws Exception {
+		String response = "";
+
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+		try {
+			connection.connect();
+			response = connection.getResponseMessage();
+			connection.disconnect();
+			return response;
+		} catch(Exception exception) {
+			return exception.getMessage();
+		}
+	}
+
+	private static void sleep(Integer mills) {
+		try {
 		    Thread.sleep(mills);
-		}catch(InterruptedException e){
+		} catch(InterruptedException e) {
 		    System.out.println("sleep was interrupted");
 		}
 	}
