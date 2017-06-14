@@ -108,7 +108,7 @@ public class FutureAdvisorAutomation {
 			try {
 				String linkResponse = getLinkResponse(new URL(link.getAttribute("href")));
 				if(!linkResponse.equals("OK")) {
-					System.out.println("WARNING: " + link.getAttribute("href") +  " returned status " + linkResponse);
+					System.out.println("WARNING: " + link.getAttribute("href") +  " returned status " + linkResponse + " instead of OK.");
 				}
 			} catch (Exception exception) {
 				System.out.println("Exception occurred:"+exception.getMessage());

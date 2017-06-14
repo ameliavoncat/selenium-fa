@@ -17,4 +17,4 @@ A Selenium automation written in Java, with dependencies managed by Maven.
 
 Source code is located in src/com/pack/FutureAdvisorAutomation.java
 
-To run from the project folder: `open main,.jar`
+To run from the project folder: `java -jar main.jar`
